@@ -32,7 +32,11 @@
             align-items: center;
             border-bottom: 1px solid #EBEBEB;
             user-select: none;
-            position: relative;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            box-sizing: border-box;
             z-index: 1000;
         }
         .menu-icon { font-size: 20px; cursor: pointer; font-weight: bold; }
@@ -50,10 +54,9 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         }
         .container {
-            padding: 12px 16px;
+            padding: 70px 16px 160px 16px; /* Top padding clears fixed app-bar, bottom padding clears fixed slider */
             max-width: 500px;
             margin: 0 auto;
-            padding-bottom: 90px;
         }
         .order-id-container { text-align: center; font-size: 14px; font-weight: 600; color: #222; margin-bottom: 12px; }
         .order-id-highlight { font-size: 17px; font-weight: 800; letter-spacing: 0.5px; }
@@ -310,7 +313,7 @@
 
         <!-- Right Side Floating Buttons -->
         <div class="map-float-btns">
-            <button class="float-btn" title="Locate" onclick="recenterMap()">
+            <button class="float-btn" title="Locate Live GPS" onclick="requestUserLocation()">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="#2563eb"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
             </button>
             <button class="float-btn" title="Alert">
@@ -414,6 +417,8 @@
 
         let map = null;
         let dropMarker = null;
+        let userLocationMarker = null;
+        let userAccuracyCircle = null;
         let dropCoords = [17.4200, 78.4800]; // Fallback Hyderabad center
 
         // Initialize UI values
@@ -439,24 +444,12 @@
             });
         }
 
-        // Helper to clean address for navigation & geocoding (stripping out company prefixes like "Swiggy-Hyd-...")
-        function getCleanAddress(fullAddress) {
-            if (!fullAddress) return "";
-            // If there's a dash prefix or format like "Name - Address", strip the first segment if it looks like a tag
-            let parts = fullAddress.split(',');
-            // If the first part contains company/name identifier and is short, we can look for the actual street address line
-            // Or more robustly, if fullAddress has multiple commas, search from the first actual house/street number pattern or just use parts.
-            return fullAddress;
-        }
-
-        // Geocoding Drop Address using Nominatim with clean address parsing
+        // Geocoding Drop Address using Nominatim
         function fetchDropCoordinates() {
             let rawAddr = appData.dropAddr;
-            // Extract clean street address line if prefix exists
             let cleanQuery = rawAddr;
             if (rawAddr.includes('-') && (rawAddr.toLowerCase().includes('swiggy') || rawAddr.toLowerCase().includes('zomato') || rawAddr.toLowerCase().includes('hyd'))) {
                 let segments = rawAddr.split('-');
-                // Find the part that looks like a street address (e.g. starts with numbers or contains building/road info)
                 for (let seg of segments) {
                     if (/\d/.test(seg) && seg.trim().length > 5) {
                         cleanQuery = seg.trim();
@@ -465,7 +458,6 @@
                 }
             }
 
-            // Fallback to full drop address if needed
             let queryUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanQuery)}`;
             
             fetch(queryUrl)
@@ -474,7 +466,6 @@
                     if (data && data.length > 0) {
                         dropCoords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
                     } else {
-                        // Secondary fallback query to guaranteed city level if specific string fails
                         fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent("Hyderabad, Telangana")}`)
                             .then(r => r.json())
                             .then(d => {
@@ -482,9 +473,7 @@
                             });
                     }
                 })
-                .catch(() => {
-                    // Silent fallback on network error
-                });
+                .catch(() => {});
         }
 
         // External Navigation Links
@@ -533,7 +522,7 @@
         }
         function closeErrorScreen() { document.getElementById('errorScreen').style.display = 'none'; }
 
-        // Secret Config Modal Triggers (5 rapid taps on header title)
+        // Secret Config Modal Triggers
         let tapCount = 0;
         let tapTimer = null;
         function handleSecretTap() {
@@ -626,7 +615,7 @@
             }
         }, 1000);
 
-        // Screen 2 Map Initialization & Leaflet Setup
+        // Screen 2 Map Initialization & Live GPS Location
         let mapInitialized = false;
         function initMap() {
             if (!mapInitialized) {
@@ -637,7 +626,7 @@
                 }).addTo(map);
 
                 dropMarker = L.marker(dropCoords).addTo(map)
-                    .bindPopup(`<b>${appData.dropName}</b><br>${appData.dropAddr}`).openPopup();
+                    .bindPopup(`<b>${appData.dropName}</b><br>${appData.dropAddr}`);
 
                 mapInitialized = true;
             } else {
@@ -647,15 +636,52 @@
                     dropMarker.bindPopup(`<b>${appData.dropName}</b><br>${appData.dropAddr}`);
                 }
             }
+            // Automatically request live user GPS location when map opens
+            requestUserLocation();
         }
-        function recenterMap() {
-            if (map) map.setView(dropCoords, 16);
+
+        function requestUserLocation() {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser");
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+                    const userLatLng = [lat, lng];
+
+                    if (!userLocationMarker) {
+                        // Custom Blue dot HTML icon for live GPS position
+                        const blueDotIcon = L.divIcon({
+                            className: 'live-gps-dot',
+                            html: '<div style="background-color: #2563eb; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 8px rgba(0,0,0,0.4);"></div>',
+                            iconSize: [16, 16],
+                            iconAnchor: [8, 8]
+                        });
+                        userLocationMarker = L.marker(userLatLng, { icon: blueDotIcon }).addTo(map)
+                            .bindPopup("You are here (Live GPS)");
+                        
+                        userAccuracyCircle = L.circle(userLatLng, { radius: accuracy, color: '#2563eb', fillColor: '#2563eb', fillOpacity: 0.15, weight: 1 }).addTo(map);
+                    } else {
+                        userLocationMarker.setLatLng(userLatLng);
+                        userAccuracyCircle.setLatLng(userLatLng);
+                        userAccuracyCircle.setRadius(accuracy);
+                    }
+                    map.setView(userLatLng, 16);
+                },
+                (error) => {
+                    alert("Unable to retrieve your location. Please check phone GPS settings.");
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
         }
 
         // Drop Timer Countdown (28 mins)
         let dropSecsLeft = 28 * 60;
         const totalDropSecs = 28 * 60;
-        const circlePerimeter = 2 * Math.PI * 26; // r=26 -> ~163.36
+        const circlePerimeter = 2 * Math.PI * 26;
         
         setInterval(() => {
             if (dropSecsLeft > 0) {
@@ -663,7 +689,6 @@
                 let mins = Math.ceil(dropSecsLeft / 60);
                 document.getElementById('dropTimerMinutes').innerText = mins;
                 
-                // Update SVG progress stroke offset
                 let progressCircle = document.getElementById('timerProgressCircle');
                 if (progressCircle) {
                     let offset = circlePerimeter - (dropSecsLeft / totalDropSecs) * circlePerimeter;
@@ -672,7 +697,7 @@
             }
         }, 1000);
 
-        // 11-Tap Return Trigger on Circular Timer to go back to Screen 1
+        // 11-Tap Return Trigger on Circular Timer
         let dropTapCount = 0;
         let dropTapTimer = null;
         function handleDropTimerTap() {
@@ -686,9 +711,8 @@
             }
         }
 
-        // Slider Interaction Logic (Screen 1 & Screen 2)
+        // Slider Interaction Logic
         function initSliders() {
-            // Screen 1 Slider: Picked
             const trackCollect = document.getElementById('sliderCollect');
             const handleCollect = document.getElementById('handleCollect');
             let isDraggingCollect = false;
@@ -707,19 +731,16 @@
 
                 if (x >= maxX - 10) {
                     isDraggingCollect = false;
-                    // Check photo requirement
                     if (appData.requirePhoto && !photoUploaded) {
                         showError("Photo Required", "Please upload a photo of the package before marking as Picked.");
                         handleCollect.style.left = '4px';
                         return;
                     }
-                    // Transition to Screen 2
                     document.getElementById('screenCollect').classList.remove('active');
                     document.getElementById('screenDrop').classList.add('active');
                     fetchDropCoordinates();
                     setTimeout(() => {
                         initMap();
-                        recenterMap();
                     }, 100);
                     handleCollect.style.left = '4px';
                 }
@@ -731,7 +752,6 @@
                 }
             });
 
-            // Screen 2 Slider: Reached / Complete Order
             const trackDrop = document.getElementById('sliderDrop');
             const handleDrop = document.getElementById('handleDrop');
             let isDraggingDrop = false;
@@ -762,7 +782,6 @@
             });
         }
 
-        // Initialize app on load
         window.onload = function() {
             initUI();
             initSliders();
