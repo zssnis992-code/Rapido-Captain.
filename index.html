@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delivery App Workflow</title>
+    
+    <!-- Link the Web Manifest for PWA -->
+    <link rel="manifest" href="manifest.json">
+
     <!-- Leaflet CSS for Realistic Zoomable Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
@@ -54,7 +58,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         }
         .container {
-            padding: 70px 16px 160px 16px; /* Top padding clears fixed app-bar, bottom padding clears fixed slider */
+            padding: 70px 16px 160px 16px;
             max-width: 500px;
             margin: 0 auto;
         }
@@ -117,11 +121,11 @@
         }
 
         /* Screen 2 Map Specifics */
-        #map { width: 100%; height: calc(100vh - 57px); position: absolute; top: 57px; left: 0; z-index: 1; }
+        #map { width: 100%; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
         
-        /* Circular Blue Timer with White Progress Stroke */
+        /* Fixed Circular Blue Timer Overlay */
         .circular-timer {
-            position: absolute; bottom: 200px; right: 16px; width: 62px; height: 62px;
+            position: fixed; bottom: 200px; right: 16px; width: 62px; height: 62px;
             background: #2563eb; border-radius: 50%; display: flex; align-items: center; justify-content: center;
             box-shadow: 0 3px 10px rgba(0,0,0,0.3); z-index: 900; cursor: pointer; border: none;
         }
@@ -132,26 +136,27 @@
         .timer-text { font-size: 14px; font-weight: 700; color: white; z-index: 2; text-align: center; }
         .timer-text span { display: block; font-size: 8px; font-weight: normal; color: #ddd; }
 
-        /* Map Bottom-Right Floating Group */
+        /* Fixed Map Bottom-Right Floating Group Overlay */
         .map-float-btns {
-            position: absolute; bottom: 275px; right: 16px; display: flex; flex-direction: column; gap: 10px; z-index: 900;
+            position: fixed; bottom: 275px; right: 16px; display: flex; flex-direction: column; gap: 10px; z-index: 900;
         }
         .float-btn {
             width: 44px; height: 44px; background: white; border-radius: 50%; display: flex;
             align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(0,0,0,0.2); cursor: pointer; border: none;
         }
 
-        /* Yellow "Go to drop" Button */
+        /* Fixed Yellow "Go to drop" Button Overlay */
         .go-to-drop-pill {
-            position: absolute; bottom: 145px; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: 145px; left: 50%; transform: translateX(-50%);
             background: #FFC107; color: #111; padding: 10px 24px; border-radius: 24px;
             font-weight: 700; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             z-index: 900; display: flex; align-items: center; gap: 6px; cursor: pointer; border: none;
             white-space: nowrap;
         }
 
+        /* Fixed Map Bottom Address Card Overlay */
         .map-bottom-card {
-            position: absolute; bottom: 76px; left: 16px; right: 16px; background: white;
+            position: fixed; bottom: 76px; left: 16px; right: 16px; background: white;
             padding: 14px 16px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 900;
         }
         .slider-track.red { background-color: #D32F2F; }
@@ -288,6 +293,7 @@
 
     <!-- ================= SCREEN 2: GO TO DROP FOOD ================= -->
     <div id="screenDrop" class="screen">
+        <!-- Fixed Header Overlay -->
         <div class="app-bar">
             <div class="menu-icon" onclick="openMenu()">☰</div>
             <div class="app-title">Go to Drop Food</div>
@@ -299,7 +305,7 @@
         <!-- Realistic Zoomable Leaflet Map -->
         <div id="map"></div>
 
-        <!-- Blue Circular Timer with White Stroke & 11-Tap Return Trigger -->
+        <!-- Fixed Blue Circular Timer Overlay -->
         <div class="circular-timer" onclick="handleDropTimerTap()" title="Tap 11 times to go back">
             <svg>
                 <circle class="bg" cx="31" cy="31" r="26" />
@@ -311,7 +317,7 @@
             </div>
         </div>
 
-        <!-- Right Side Floating Buttons -->
+        <!-- Fixed Right Side Floating Buttons Overlay -->
         <div class="map-float-btns">
             <button class="float-btn" title="Locate Live GPS" onclick="requestUserLocation()">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="#2563eb"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
@@ -321,16 +327,18 @@
             </button>
         </div>
 
-        <!-- Yellow "Go to drop" Button -->
+        <!-- Fixed Yellow "Go to drop" Button Overlay -->
         <button class="go-to-drop-pill" onclick="openDropGoogleMaps()">
             <span>▲</span> Go to drop
         </button>
 
+        <!-- Fixed Map Bottom Address Card Overlay -->
         <div class="map-bottom-card">
             <div id="dropCustomerName" style="font-weight: 700; font-size: 15px; margin-bottom: 2px;">Swiggy-Hyd-Ajay Kolupula</div>
             <div id="dropCustomerAddr" style="font-size: 12px; color: #666; line-height: 1.3;">1-4-550/B/A, Indira Nagar, Kavadiguda, Hyderabad, Telangana 500020</div>
         </div>
 
+        <!-- Fixed Bottom Slider Overlay -->
         <div class="slide-container">
             <div class="slider-track red" id="sliderDrop">
                 <span>Reached</span>
@@ -356,437 +364,8 @@
     <div id="errorScreen">
         <div class="error-icon">⚠️</div>
         <div class="error-title" id="errorTitle">Action Required</div>
-        <div class="error-sub" id="errorSub">Please upload a photo of the package before proceeding.</div>
-        <button class="error-btn" onclick="closeErrorScreen()">Okay</button>
+        <div class="error-sub" id="errorSub">Please upload a photo of the package</div>
     </div>
 
-    <!-- ================= SECRET CONFIG MODAL ================= -->
-    <div id="configModal">
-        <div class="modal-content">
-            <h3 style="margin-top:0; font-size:15px; border-bottom:1px solid #eee; padding-bottom:6px;">🛠️ App Config & Test Mode</h3>
-            
-            <label>Order ID Prefix & Suffix:</label>
-            <div style="display:flex; gap:6px;">
-                <input type="text" id="cfgOrderIdPrefix" style="flex:2;">
-                <input type="text" id="cfgOrderIdSuffix" style="flex:1;">
-            </div>
-
-            <label>Pickup Restaurant Name:</label>
-            <input type="text" id="cfgPickupName">
-
-            <label>Pickup Address:</label>
-            <textarea id="cfgPickupAddr" rows="2"></textarea>
-
-            <label>Drop Customer / Title:</label>
-            <input type="text" id="cfgDropName">
-
-            <label>Drop Street Address (Clean Line for Geocoding):</label>
-            <textarea id="cfgDropAddr" rows="2"></textarea>
-
-            <label style="display:flex; align-items:center; gap:6px; margin: 8px 0; cursor:pointer;">
-                <input type="checkbox" id="cfgRequirePhoto" style="width:auto; margin:0;"> Require Photo Upload before "Picked"
-            </label>
-
-            <div style="font-size:11px; font-weight:bold; color:#555; margin-top:8px;">Manage Items:</div>
-            <div id="cfgItemsList"></div>
-            <button onclick="addItemRowConfig()" style="background:#f0f0f0; border:1px dashed #99f; padding:4px 8px; font-size:11px; width:100%; cursor:pointer; margin-bottom:10px;">+ Add Item</button>
-
-            <div style="display:flex; gap:8px; margin-top:12px;">
-                <button onclick="saveConfig()" style="flex:1; background:#2563eb; color:white; border:none; padding:8px; border-radius:6px; font-weight:bold; cursor:pointer;">Save & Apply</button>
-                <button onclick="closeConfigModal()" style="flex:1; background:#ccc; color:#111; border:none; padding:8px; border-radius:6px; font-weight:bold; cursor:pointer;">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // State Configuration defaults
-        let appData = {
-            orderIdPrefix: "25001005710",
-            orderIdSuffix: "6357",
-            pickupName: "Burger King",
-            pickupAddr: "Unit No. 2, Ground Floor, Jainam Towers, L B Nagar, Hyderabad",
-            dropName: "Swiggy-Hyd-Ajay Kolupula",
-            dropAddr: "1-4-550/B/A, Indira Nagar, Kavadiguda, Hyderabad, Telangana 500020",
-            requirePhoto: true,
-            items: [
-                { name: "Whopper Meal", qty: 1 },
-                { name: "Crispy Veg Burger", qty: 2 },
-                { name: "French Fries (Large)", qty: 1 }
-            ]
-        };
-
-        let map = null;
-        let dropMarker = null;
-        let userLocationMarker = null;
-        let userAccuracyCircle = null;
-        let dropCoords = [17.4200, 78.4800]; // Fallback Hyderabad center
-
-        // Initialize UI values
-        function initUI() {
-            document.getElementById('lblOrderIdPrefix').innerText = appData.orderIdPrefix;
-            document.getElementById('lblOrderIdSuffix').innerText = appData.orderIdSuffix;
-            document.getElementById('lblPickupName').innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="black"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>` + appData.pickupName;
-            document.getElementById('lblPickupAddr').innerText = appData.pickupAddr;
-            
-            document.getElementById('lblDropName').innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="black"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>` + appData.dropName;
-            document.getElementById('lblDropAddr').innerText = appData.dropAddr;
-
-            document.getElementById('dropCustomerName').innerText = appData.dropName;
-            document.getElementById('dropCustomerAddr').innerText = appData.dropAddr;
-
-            let container = document.getElementById('itemsContainer');
-            container.innerHTML = "";
-            appData.items.forEach(item => {
-                let row = document.createElement('div');
-                row.className = 'item-row';
-                row.innerHTML = `<span>${item.name}</span><span style="font-weight:600;">x${item.qty}</span>`;
-                container.appendChild(row);
-            });
-        }
-
-        // Geocoding Drop Address using Nominatim
-        function fetchDropCoordinates() {
-            let rawAddr = appData.dropAddr;
-            let cleanQuery = rawAddr;
-            if (rawAddr.includes('-') && (rawAddr.toLowerCase().includes('swiggy') || rawAddr.toLowerCase().includes('zomato') || rawAddr.toLowerCase().includes('hyd'))) {
-                let segments = rawAddr.split('-');
-                for (let seg of segments) {
-                    if (/\d/.test(seg) && seg.trim().length > 5) {
-                        cleanQuery = seg.trim();
-                        break;
-                    }
-                }
-            }
-
-            let queryUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanQuery)}`;
-            
-            fetch(queryUrl)
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.length > 0) {
-                        dropCoords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-                    } else {
-                        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent("Hyderabad, Telangana")}`)
-                            .then(r => r.json())
-                            .then(d => {
-                                if(d && d.length > 0) dropCoords = [parseFloat(d[0].lat), parseFloat(d[0].lon)];
-                            });
-                    }
-                })
-                .catch(() => {});
-        }
-
-        // External Navigation Links
-        function openGoogleMaps() {
-            window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(appData.pickupAddr)}`, '_blank');
-        }
-
-        function openDropGoogleMaps() {
-            let rawAddr = appData.dropAddr;
-            let targetAddr = rawAddr;
-            if (rawAddr.includes('-') && (rawAddr.toLowerCase().includes('swiggy') || rawAddr.toLowerCase().includes('zomato'))) {
-                let parts = rawAddr.split('-');
-                for (let p of parts) {
-                    if (/\d/.test(p) && p.trim().length > 5) {
-                        targetAddr = p.trim();
-                        break;
-                    }
-                }
-            }
-            window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(targetAddr)}`, '_blank');
-        }
-
-        // Photo Upload Handling
-        let photoUploaded = false;
-        function handlePhotoUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('previewImage').src = e.target.result;
-                    document.getElementById('uploadPrompt').style.display = 'none';
-                    document.getElementById('previewWrapper').style.display = 'block';
-                    photoUploaded = true;
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // Modal Controls
-        function openCallModal() { document.getElementById('callModal').style.display = 'flex'; }
-        function closeCallModal() { document.getElementById('callModal').style.display = 'none'; }
-        function showError(title, sub) {
-            document.getElementById('errorTitle').innerText = title;
-            document.getElementById('errorSub').innerText = sub;
-            document.getElementById('errorScreen').style.display = 'flex';
-        }
-        function closeErrorScreen() { document.getElementById('errorScreen').style.display = 'none'; }
-
-        // Secret Config Modal Triggers
-        let tapCount = 0;
-        let tapTimer = null;
-        function handleSecretTap() {
-            tapCount++;
-            clearTimeout(tapTimer);
-            tapTimer = setTimeout(() => { tapCount = 0; }, 1000);
-            if (tapCount >= 5) {
-                tapCount = 0;
-                openConfigModal();
-            }
-        }
-
-        function openConfigModal() {
-            document.getElementById('cfgOrderIdPrefix').value = appData.orderIdPrefix;
-            document.getElementById('cfgOrderIdSuffix').value = appData.orderIdSuffix;
-            document.getElementById('cfgPickupName').value = appData.pickupName;
-            document.getElementById('cfgPickupAddr').value = appData.pickupAddr;
-            document.getElementById('cfgDropName').value = appData.dropName;
-            document.getElementById('cfgDropAddr').value = appData.dropAddr;
-            document.getElementById('cfgRequirePhoto').checked = appData.requirePhoto;
-            
-            renderConfigItems();
-            document.getElementById('configModal').style.display = 'flex';
-        }
-        function closeConfigModal() { document.getElementById('configModal').style.display = 'none'; }
-
-        function renderConfigItems() {
-            let list = document.getElementById('cfgItemsList');
-            list.innerHTML = "";
-            appData.items.forEach((item, index) => {
-                let div = document.createElement('div');
-                div.className = 'item-edit-group';
-                div.innerHTML = `
-                    <div style="display:flex; gap:6px;">
-                        <input type="text" value="${item.name}" placeholder="Item Name" id="cfgItemName_${index}" style="flex:3; margin-bottom:4px;">
-                        <input type="number" value="${item.qty}" placeholder="Qty" id="cfgItemQty_${index}" style="flex:1; margin-bottom:4px;">
-                        <button onclick="removeItemConfig(${index})" style="background:#fee2e2; color:#dc2626; border:none; border-radius:4px; padding:0 8px; cursor:pointer;">✕</button>
-                    </div>
-                `;
-                list.appendChild(div);
-            });
-        }
-        function addItemRowConfig() {
-            appData.items.push({ name: "New Item", qty: 1 });
-            renderConfigItems();
-        }
-        function removeItemConfig(index) {
-            appData.items.splice(index, 1);
-            renderConfigItems();
-        }
-        function saveConfig() {
-            appData.orderIdPrefix = document.getElementById('cfgOrderIdPrefix').value;
-            appData.orderIdSuffix = document.getElementById('cfgOrderIdSuffix').value;
-            appData.pickupName = document.getElementById('cfgPickupName').value;
-            appData.pickupAddr = document.getElementById('cfgPickupAddr').value;
-            appData.dropName = document.getElementById('cfgDropName').value;
-            appData.dropAddr = document.getElementById('cfgDropAddr').value;
-            appData.requirePhoto = document.getElementById('cfgRequirePhoto').checked;
-
-            let updatedItems = [];
-            appData.items.forEach((_, index) => {
-                let nameEl = document.getElementById(`cfgItemName_${index}`);
-                let qtyEl = document.getElementById(`cfgItemQty_${index}`);
-                if (nameEl && qtyEl) {
-                    updatedItems.push({ name: nameEl.value, qty: parseInt(qtyEl.value) || 1 });
-                }
-            });
-            appData.items = updatedItems;
-
-            initUI();
-            fetchDropCoordinates();
-            closeConfigModal();
-        }
-
-        // Wait Timer & Banner State Logic
-        let waitSecondsLeft = 180;
-        setInterval(() => {
-            if (waitSecondsLeft > 0) {
-                waitSecondsLeft--;
-                let m = String(Math.floor(waitSecondsLeft / 60)).padStart(2, '0');
-                let s = String(waitSecondsLeft % 60).padStart(2, '0');
-                document.getElementById('lblTimer').innerText = `${m}:${s}`;
-                
-                if (waitSecondsLeft === 0) {
-                    let banner = document.getElementById('statusBanner');
-                    banner.classList.add('ready');
-                    document.getElementById('lblBannerTitle').innerText = "Food is Ready!";
-                    document.getElementById('lblBannerSub').innerText = "Please collect package from counter";
-                }
-            }
-        }, 1000);
-
-        // Screen 2 Map Initialization & Live GPS Location
-        let mapInitialized = false;
-        function initMap() {
-            if (!mapInitialized) {
-                map = L.map('map', { zoomControl: false }).setView(dropCoords, 15);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '&copy; OpenStreetMap contributors'
-                }).addTo(map);
-
-                dropMarker = L.marker(dropCoords).addTo(map)
-                    .bindPopup(`<b>${appData.dropName}</b><br>${appData.dropAddr}`);
-
-                mapInitialized = true;
-            } else {
-                map.setView(dropCoords, 15);
-                if (dropMarker) {
-                    dropMarker.setLatLng(dropCoords);
-                    dropMarker.bindPopup(`<b>${appData.dropName}</b><br>${appData.dropAddr}`);
-                }
-            }
-            // Automatically request live user GPS location when map opens
-            requestUserLocation();
-        }
-
-        function requestUserLocation() {
-            if (!navigator.geolocation) {
-                alert("Geolocation is not supported by your browser");
-                return;
-            }
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    const accuracy = position.coords.accuracy;
-                    const userLatLng = [lat, lng];
-
-                    if (!userLocationMarker) {
-                        // Custom Blue dot HTML icon for live GPS position
-                        const blueDotIcon = L.divIcon({
-                            className: 'live-gps-dot',
-                            html: '<div style="background-color: #2563eb; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 8px rgba(0,0,0,0.4);"></div>',
-                            iconSize: [16, 16],
-                            iconAnchor: [8, 8]
-                        });
-                        userLocationMarker = L.marker(userLatLng, { icon: blueDotIcon }).addTo(map)
-                            .bindPopup("You are here (Live GPS)");
-                        
-                        userAccuracyCircle = L.circle(userLatLng, { radius: accuracy, color: '#2563eb', fillColor: '#2563eb', fillOpacity: 0.15, weight: 1 }).addTo(map);
-                    } else {
-                        userLocationMarker.setLatLng(userLatLng);
-                        userAccuracyCircle.setLatLng(userLatLng);
-                        userAccuracyCircle.setRadius(accuracy);
-                    }
-                    map.setView(userLatLng, 16);
-                },
-                (error) => {
-                    alert("Unable to retrieve your location. Please check phone GPS settings.");
-                },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-        }
-
-        // Drop Timer Countdown (28 mins)
-        let dropSecsLeft = 28 * 60;
-        const totalDropSecs = 28 * 60;
-        const circlePerimeter = 2 * Math.PI * 26;
-        
-        setInterval(() => {
-            if (dropSecsLeft > 0) {
-                dropSecsLeft--;
-                let mins = Math.ceil(dropSecsLeft / 60);
-                document.getElementById('dropTimerMinutes').innerText = mins;
-                
-                let progressCircle = document.getElementById('timerProgressCircle');
-                if (progressCircle) {
-                    let offset = circlePerimeter - (dropSecsLeft / totalDropSecs) * circlePerimeter;
-                    progressCircle.style.strokeDashoffset = offset;
-                }
-            }
-        }, 1000);
-
-        // 11-Tap Return Trigger on Circular Timer
-        let dropTapCount = 0;
-        let dropTapTimer = null;
-        function handleDropTimerTap() {
-            dropTapCount++;
-            clearTimeout(dropTapTimer);
-            dropTapTimer = setTimeout(() => { dropTapCount = 0; }, 1200);
-            if (dropTapCount >= 11) {
-                dropTapCount = 0;
-                document.getElementById('screenDrop').classList.remove('active');
-                document.getElementById('screenCollect').classList.add('active');
-            }
-        }
-
-        // Slider Interaction Logic
-        function initSliders() {
-            const trackCollect = document.getElementById('sliderCollect');
-            const handleCollect = document.getElementById('handleCollect');
-            let isDraggingCollect = false;
-
-            handleCollect.addEventListener('pointerdown', (e) => {
-                isDraggingCollect = true;
-                handleCollect.setPointerCapture(e.pointerId);
-            });
-            handleCollect.addEventListener('pointermove', (e) => {
-                if (!isDraggingCollect) return;
-                const rect = trackCollect.getBoundingClientRect();
-                let x = e.clientX - rect.left - (handleCollect.offsetWidth / 2);
-                let maxX = rect.width - handleCollect.offsetWidth - 4;
-                x = Math.max(4, Math.min(x, maxX));
-                handleCollect.style.left = x + 'px';
-
-                if (x >= maxX - 10) {
-                    isDraggingCollect = false;
-                    if (appData.requirePhoto && !photoUploaded) {
-                        showError("Photo Required", "Please upload a photo of the package before marking as Picked.");
-                        handleCollect.style.left = '4px';
-                        return;
-                    }
-                    document.getElementById('screenCollect').classList.remove('active');
-                    document.getElementById('screenDrop').classList.add('active');
-                    fetchDropCoordinates();
-                    setTimeout(() => {
-                        initMap();
-                    }, 100);
-                    handleCollect.style.left = '4px';
-                }
-            });
-            handleCollect.addEventListener('pointerup', () => {
-                if (isDraggingCollect) {
-                    isDraggingCollect = false;
-                    handleCollect.style.left = '4px';
-                }
-            });
-
-            const trackDrop = document.getElementById('sliderDrop');
-            const handleDrop = document.getElementById('handleDrop');
-            let isDraggingDrop = false;
-
-            handleDrop.addEventListener('pointerdown', (e) => {
-                isDraggingDrop = true;
-                handleDrop.setPointerCapture(e.pointerId);
-            });
-            handleDrop.addEventListener('pointermove', (e) => {
-                if (!isDraggingDrop) return;
-                const rect = trackDrop.getBoundingClientRect();
-                let x = e.clientX - rect.left - (handleDrop.offsetWidth / 2);
-                let maxX = rect.width - handleDrop.offsetWidth - 4;
-                x = Math.max(4, Math.min(x, maxX));
-                handleDrop.style.left = x + 'px';
-
-                if (x >= maxX - 10) {
-                    isDraggingDrop = false;
-                    alert('Order Completed Successfully! Returning to dashboard.');
-                    location.reload();
-                }
-            });
-            handleDrop.addEventListener('pointerup', () => {
-                if (isDraggingDrop) {
-                    isDraggingDrop = false;
-                    handleDrop.style.left = '4px';
-                }
-            });
-        }
-
-        window.onload = function() {
-            initUI();
-            initSliders();
-            fetchDropCoordinates();
-        };
-    </script>
 </body>
 </html>
